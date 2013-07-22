@@ -41,21 +41,44 @@ class Search {
   virtual void Run() = 0;
 
  protected:
+  /* all branch Ids in program
+   *
+   */
   vector<branch_id_t> branches_;
+  /*
+   * branches relation
+   *  if paired_branch_[x] = y then x,y is a pair of branches
+   * obvoiusly if  paired_branch_[x] = y then paired_branch_[y] = x
+   */
   vector<branch_id_t> paired_branch_;
+  /*
+   * branch to funcion Mapping
+   * if branch_function_[i] = x then branches_[i] is for function number x
+   */
   vector<function_id_t> branch_function_;
   vector<bool> covered_;
   vector<bool> total_covered_;
+  /* init with: max(All BarchIds) + 1
+   *
+   */
   branch_id_t max_branch_;
   unsigned int num_covered_;
   unsigned int total_num_covered_;
 
   vector<bool> reached_;
+  /* Number of Branches in each function
+   *
+   */
   vector<unsigned int> branch_count_;
+  /*
+   * Number of All Functions
+   */
   function_id_t max_function_;
   unsigned int reachable_functions_;
   unsigned int reachable_branches_;
-
+  /*
+   * Timestamp of Run start
+   */
   time_t start_time_;
 
   typedef vector<branch_id_t>::const_iterator BranchIt;
@@ -76,8 +99,17 @@ class Search {
   void RandomInput(const map<var_t,type_t>& vars, vector<value_t>* input);
 
  private:
+  /*
+   * address of program to Run
+   */
   const string program_;
-  const int max_iters_; 
+  /*
+   * Maximum Iter
+   */
+  const int max_iters_;
+  /*
+   * Number of Current Iter
+   */
   int num_iters_;
 
   /*

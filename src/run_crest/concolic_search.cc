@@ -66,7 +66,19 @@ Search::Search(const string& program, int max_iterations)
     branch_count_.reserve(100000);
     branch_count_.push_back(0);
 
+    /*
+	 * file "branches" structure:
+	 * allfunction.each{
+	 *  l = 0
+	 *  Line l = functionId NumberofBranchePairsWithinFunction
+	 *  NumberofBranches.times{ |i|
+	 * 	 l = l + i;
+	 * 	 Line l = branch1 branch2
+	 *  }
+	 * }
+	 */
     ifstream in("branches");
+
     assert(in);
     function_id_t fid;
     int numBranches;
@@ -74,10 +86,10 @@ Search::Search(const string& program, int max_iterations)
       branch_count_.push_back(2 * numBranches);
       branch_id_t b1, b2;
       for (int i = 0; i < numBranches; i++) {
-	assert(in >> b1 >> b2);
-	branches_.push_back(b1);
-	branches_.push_back(b2);
-	max_branch_ = max(max_branch_, max(b1, b2));
+		assert(in >> b1 >> b2);
+		branches_.push_back(b1);
+		branches_.push_back(b2);
+		max_branch_ = max(max_branch_, max(b1, b2));
       }
     }
     in.close();
@@ -97,7 +109,7 @@ Search::Search(const string& program, int max_iterations)
   { size_t i = 0;
     for (function_id_t j = 0; j < branch_count_.size(); j++) {
       for (size_t k = 0; k < branch_count_[j]; k++) {
-	branch_function_[branches_[i++]] = j;
+    	  branch_function_[branches_[i++]] = j;
       }
     }
   }
@@ -202,7 +214,7 @@ void Search::RunProgram(const vector<value_t>& inputs, SymbolicExecution* ex) {
   LaunchProgram(inputs);
 
   // Read the execution from the program.
-  // Want to do this with sockets.  (Currently doing it with files.)
+  // TODO(CREST Authors) Want to do this with sockets.  (Currently doing it with files.)
   ifstream in("szd_execution", ios::in | ios::binary);
   assert(in && ex->Parse(in));
   in.close();
@@ -296,6 +308,7 @@ bool Search::SolveAtBranch(const SymbolicExecution& ex,
 
   const vector<SymbolicPred*>& constraints = ex.path().constraints();
 
+  // TODO(mabdi) why this optimization is usefull????
   // Optimization: If any of the previous constraints are idential to the
   // branch_idx-th constraint, immediately return false.
   for (int i = static_cast<int>(branch_idx) - 1; i >= 0; i--) {
@@ -318,6 +331,7 @@ bool Search::SolveAtBranch(const SymbolicExecution& ex,
     *input = ex.inputs();
     // RandomInput(ex.vars(), input);
 
+    // TODO(mabdi) what is he doing here??? "i->first" is type or Idenx??
     typedef map<var_t,value_t>::const_iterator SolnIt;
     for (SolnIt i = soln.begin(); i != soln.end(); ++i) {
       (*input)[i->first] = i->second;
@@ -360,6 +374,7 @@ BoundedDepthFirstSearch::~BoundedDepthFirstSearch() { }
 
 void BoundedDepthFirstSearch::Run() {
   // Initial execution (on empty/random inputs).
+	// TODO(mabdi) use a Input Seed. not empty or random input
   SymbolicExecution ex;
   RunProgram(vector<value_t>(), &ex);
   UpdateCoverage(ex);
@@ -478,21 +493,21 @@ void RandomSearch::Run() {
 
       size_t idx;
       if (SolveRandomBranch(&next_input, &idx)) {
-	RunProgram(next_input, &next_ex);
-	bool found_new_branch = UpdateCoverage(next_ex);
-	bool prediction_failed =
-	  !CheckPrediction(ex_, next_ex, ex_.path().constraints_idx()[idx]);
+		RunProgram(next_input, &next_ex);
+		bool found_new_branch = UpdateCoverage(next_ex);
+		bool prediction_failed =
+		  !CheckPrediction(ex_, next_ex, ex_.path().constraints_idx()[idx]);
 
-	if (found_new_branch) {
-	  count = 0;
-	  ex_.Swap(next_ex);
-	  if (prediction_failed)
-	    fprintf(stderr, "Prediction failed (but got lucky).\n");
-	} else if (!prediction_failed) {
-	  ex_.Swap(next_ex);
-	} else {
-	  fprintf(stderr, "Prediction failed.\n");
-	}
+		if (found_new_branch) {
+		  count = 0;
+		  ex_.Swap(next_ex);
+		  if (prediction_failed)
+			fprintf(stderr, "Prediction failed (but got lucky).\n");
+		} else if (!prediction_failed) {
+		  ex_.Swap(next_ex);
+		} else {
+		  fprintf(stderr, "Prediction failed.\n");
+		}
       }
     }
   }

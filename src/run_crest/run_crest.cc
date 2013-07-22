@@ -8,6 +8,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See LICENSE
 // for details.
 
+#include <stdio.h>
 #include <assert.h>
 #include <time.h>
 

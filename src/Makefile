@@ -1,5 +1,5 @@
 
-YICES_DIR=/home/default/tez/Yices
+YICES_DIR=/home/default/tez/yices-1.0.38
 
 CC=$(CXX)
 CFLAGS = -I. -I$(YICES_DIR)/include -Wall -O2
